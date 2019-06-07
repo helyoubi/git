@@ -1,0 +1,38 @@
+package fr.datasyscom.scopiom.rest.device;
+
+import java.security.Principal;
+import java.util.List;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import fr.datasyscom.pome.ejbentity.filter.DeviceFilter;
+
+@Stateless
+@Path("/devicesBis")
+public class DeviceRestResource {
+
+	@Inject
+	private Principal loggedUser;
+
+	@EJB
+	private DeviceResourceLocal dr;
+
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response restDevices(@QueryParam("name") List<String> deviceNames) {
+		if (deviceNames == null || deviceNames.isEmpty()) {
+			return Response.ok(dr.devices(DeviceFilter.device().byUser(loggedUser.getName()))).build();
+		}
+		return Response.ok(dr.devices(DeviceFilter.device().byUser(loggedUser.getName()).byNamesLike(deviceNames)))
+				.build();
+	}
+
+}
